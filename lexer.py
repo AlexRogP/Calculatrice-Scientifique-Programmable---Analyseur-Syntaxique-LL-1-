@@ -102,52 +102,56 @@ def reinit(stream=sys.stdin):
 
 
 def read_INT_to_EOI():
-    # print("@ATTENTION: lexer.read_INT_to_EOI à finir !") # LIGNE A SUPPRIMER
-    etat = 0
-    next = peek_char1()
-    while next != defs.EOI:
-        if etat == 0 or etat == 1:
-            if next in defs.DIGITS:
-                etat = 1
-            else:
-                etat = 2
-        consume_char()
-        next = peek_char1()
-    return etat==1
+    #print("@ATTENTION: lexer.read_INT_to_EOI à finir !") # LIGNE A SUPPRIMER
+    x=peek_char1()
+    print("ici x=",x)
+    number=['0','1','2','3','4','5','6','7','8','9']
+    while x!= defs.EOI :
+        if x in number:
+            consume_char()
+            x=peek_char1()
+        else:
+            return False
+    return True
 
 
 def read_FLOAT_to_EOI():
-    # print("@ATTENTION: lexer.read_FLOAT_to_EOI à finir !") # LIGNE A SUPPRIMER
-    state = 0
-    next = peek_char1()
-    while next != defs.EOI:
-        if state == 0:
-            if next == '.': 
-                state = 1
-            elif next in defs.DIGITS:
-                state = 2
-            else: 
-                state = 4
-        elif state == 1:
-            if next in defs.DIGITS:
-                state = 3
-            else:
-                state = 4
-        elif state == 2:
-            if next == '.':
-                state = 3
-            elif next in defs.DIGITS:
-                state = 2 
-            else:
-                state = 4
-        elif state == 3:
-            if next in defs.DIGITS:
-                state = 3 
-            else: 
-                state = 4
+    #print("@ATTENTION: lexer.read_FLOAT_to_EOI à finir !") # LIGNE A SUPPRIMER
+    c=peek_char1()
+    number=['0','1','2','3','4','5','6','7','8','9']
+    # Je fais le cas où l'on a un nombre comme .5
+    if c== '.':
         consume_char()
-        next = peek_char1()
-    return (state == 3)
+        c=peek_char1()
+        while c!=defs.EOI:
+            if c in number:
+                consume_char()
+                c=peek_char1()
+            else:
+                return False
+        return True
+    #Je créer le cas où on a un chiffre comme 4.5
+    elif c in number:
+        consume_char()
+        c=peek_char1()
+        while c!='.':
+            if c in number:
+                consume_char()
+                c=peek_char1()
+            else:
+                return False
+        consume_char()
+        c=peek_char1()
+        while c!=defs.EOI:
+            if c in number:
+                consume_char()
+                c=peek_char1()
+            else:
+                return False
+        return True
+    else:
+        return False
+
 
 
 #################################
@@ -166,319 +170,204 @@ def read_digit():
 
 # Lecture d'un entier en renvoyant sa valeur
 def read_INT():
-    # print("@ATTENTION: lexer.read_INT à finir !") # LIGNE A SUPPRIMER
-    next = peek_char1()
-    valeur = 0
-    if next not in defs.DIGITS:
-        return None
-    while next in defs.DIGITS:
-        digit = read_digit()
-        # print(digit*10)
-        valeur = valeur*10 + digit
-        next = peek_char1()
-    return valeur;
+    #print("@ATTENTION: lexer.read_INT à finir !") # LIGNE A SUPPRIMER
+    c=peek_char1()
+    number=['0','1','2','3','4','5','6','7','8','9']
+    nombre=""
+    while c in number:
+        nombre+=c
+        consume_char()
+        c=peek_char1()
+    return int(nombre)
+    
+    
 
 
 global int_value
 global exp_value
 global sign_value
-global float_value
-global apres_virgule
-global apres_exp
 
 
-def automate_num(etat, input):
-    # print(input)
-    match etat:
-        case 0:
-            if input in defs.DIGITS:
-                etat = 3
-            elif input == '.':
-                etat = 1
-            else:
-                etat = 7
-        case 1:
-            if input in defs.DIGITS:
-                etat = 2
-            else:
-                etat = 7
-        case 2:
-            # print(f"input = {input}")
-            if input in defs.DIGITS:
-                # print(f"input = {input}")
-                etat = 2
-            elif input in ('e', 'E'):
-                etat = 4
-            else:
-                etat = 7
-        case 3:
-            if input in defs.DIGITS:
-                etat = 3
-            elif input in ('e', 'E'):
-                etat = 4
-            elif input == '.':
-                etat = 2
-            else: 
-                etat = 7
-        case 4:
-            if input in defs.DIGITS:
-                etat = 6
-            elif input in ['+','-']:
-                etat = 5
-            else:
-                etat = 7
-        case 5:
-            if input in defs.DIGITS:
-                etat = 6
-            else:
-                etat = 7
-        case 6:
-            if input in defs.DIGITS:
-                etat = 6
-            else:
-                etat = 7
-    # print(f"etat = {etat}")
-    return etat
+#Cette fonction prends les 3 éléments donné par peek_char3() et avance de 3
+#Elle est surtout là pour eviter de réécrire du code
+def recup_car():
+    s=peek_char3()
+    c=s[0]
+    d=s[1]
+    e=s[2]
+    consume_char()
+    consume_char()
+    consume_char()
+    return c,d,e
 
-def automate_sim(automate, etat, char):
-    if char in defs.DIGITS:
-        entree = 1
-    elif char == '.':
-        entree = 2
-    elif char in ('E', 'e'):
-        entree = 3
-    elif char in ('+', '-'):
-        entree = 4
-    else: 
-        entree = 5
-    return automate[entree - 1][etat]
-
-def char_to_val(caractere):
-    global int_value
-    global exp_value
-    global sign_value
-    global float_value
-    global apres_virgule
-    global apres_exp
-
-    if caractere == '.':
-        apres_virgule = 1
-        consume_char()
-    elif caractere in ('e', 'E'):
-        apres_exp = 1
-        consume_char()
-    elif caractere in ('+','-'):
-        if caractere == '-':
-            sign_value = -1
-        consume_char()
-    elif caractere in defs.DIGITS:
-        if apres_exp:
-            exp_value = exp_value*10 + read_digit()
-        elif apres_virgule:
-            float_value -= 1
-            int_value = int_value*10 + read_digit()
+#Sous partie de A
+def B(dernier_car,mot):
+    interger=['0','1','2','3','4','5','6','7','8','9']
+    pointfloat=['.','0','1','2','3','4','5','6','7','8','9']
+    exposant=['e','E','+','-']
+    mot = mot[1:]               #Q4
+    c=mot[0]
+    print("mot=",mot)
+    if c in interger:               #Q6
+        while c!=dernier_car:
+            if c in interger:
+                mot = mot[1:] 
+                c=mot[0]
+            else:
+                return False
+        if c=='.':
+            return False
         else:
-            int_value = int_value*10 + read_digit()
+            return True
+    elif c=='+' or c=='-':       #Q5
+        if c==dernier_car:
+            return False
+        mot = mot[1:] 
+        c=mot[0]
+        if c in interger:       #Q6
+            while c!=dernier_car:
+                if c in interger:
+                    mot = mot[1:] 
+                    c=mot[0]
+                else:
+                    return False
+            return True
+    else:
+        return False
+#Sous partie de la fonction read_NUMBER_to_EOI
+def A(dernier_car,mot):
+    interger=['0','1','2','3','4','5','6','7','8','9']
+    pointfloat=['.','0','1','2','3','4','5','6','7','8','9']
+    exposant=['e','E','+','-']
+    if mot==dernier_car:
+        return False
+    mot = mot[1:]  
+    c=mot[0]
+    if c=='.':
+        return False
+    while c!=dernier_car and c!='E' and c!='e': #Q2
+        if c in interger:
+            mot = mot[1:]  
+            c=mot[0]
+        else:
+            return False
+    if c==dernier_car:
+        if c in pointfloat:
+            return True
+        else:
+            return False
+    return B(dernier_car,mot)
+#Fonction qui implemte l'automate de number pour voir si un mot est accepté 
+#L'automate étant long il sera divisé en sous partie 
+def read_NUMBER_to_EOI(mot):
+    interger=['0','1','2','3','4','5','6','7','8','9']
+    pointfloat=['.','0','1','2','3','4','5','6','7','8','9']
+    exposant=['e','E','+','-']
+    c=mot[0]
+    if c not in pointfloat:
+        return False
+    dernier_car=mot[-1]
+    if c== '.':                     #Q1
+        return A(dernier_car,mot)
+    else:
+        if c==dernier_car: #Cas ou ou l'entré est de longueur 1
+            return True
+        mot = mot[1:] 
+        c=mot[0]
+        while c!= dernier_car and c!='E' and c!='e' and c!='.':
+            if c in interger:
+                mot = mot[1:] 
+                c=mot[0]
+            else:
+                return False
+        if c==dernier_car:
+            if c in pointfloat and len(mot)==1:
+                return True
+            else:
+                return False
+        elif c=='.':
+            return A(dernier_car,mot)
+        else:
+            return B(dernier_car,mot)
+
+#Cette fonction prends un chaine de caractères repreenteant un nombre et le calcul
+def calcul(mot):
+    mot1=""
+    mot2=""
+    deja_passe=False
+    if 'E' in mot or 'e' in mot:
+        for x in mot:
+            if x!='E'and  x!='e' and deja_passe==False:
+                mot1+=x
+            if x!='E' and x!='e' and deja_passe==True:
+                mot2+=x
+            if x=='E' or x=='e':
+                deja_passe=True
+        if '.' in mot1:
+            mot1=float(mot1)
+        else:
+            mot1=int(mot1)
+        if '.' in mot2:
+            mot2=float(mot2)
+        else:
+            mot2=int(mot2)
+        return mot1*(10**(mot2))
+    else:
+        if '.' in mot:
+            return float(mot)
+        else:
+            return int(mot)
 
 
 # Lecture d'un nombre en renvoyant sa valeur
 def read_NUM():
-    global int_value
-    global exp_value
-    global sign_value
-    global float_value
-    global apres_virgule
-    global apres_exp
+    #print("@ATTENTION: lexer.read_NUM à finir !") # LIGNE A SUPPRIMER
+    # Number = (integer ∪ pointfloat) (exponent ∪ {ε})
+    #J'utilise la fonc read_NUMBER_to_EOI pour validé ou pas un mot 
 
-    automate = [[3,2,2,3,6,6,6,7],
-                [1,7,7,2,7,7,7,7],
-                [7,7,4,4,7,7,7,7],
-                [7,7,7,7,5,7,7,7],
-                [7,7,7,7,7,7,7,7]]
+    #Je vais récupérér l'ensemble de l'entré
+    mot_finale=""
+    c=peek_char1()
+    while c!=defs.EOI:
+        mot_finale+=c
+        consume_char() 
+        c=peek_char1()
+    mot_finale+=c
+    print("mot_finale=",mot_finale)
 
-    etat = 0
-    etat_3 = 0
-    char_3 = peek_char3()
-    char_1 = peek_char1()
-    # 0 => not stuck
-    stuck = 0
-    lexeme = ""
-    int_value = 0
-    exp_value = 0
-    sign_value = 1
-    float_value = 0
-    apres_virgule = 0
-    apres_exp = 0
+    #Je pars de la fin du mot, si il n'est pas accepté alors je retire le dernier caractère et je le reteste
+    #Et ainsi de suite jusqu'à trouver le mot le plus long qui est accepté
+    while mot_finale!="" and not read_NUMBER_to_EOI(mot_finale):
+        mot_finale=mot_finale[:-1]
+    if mot_finale=="":
+        print("Aucun préfixe accepté")
+        return
+    print("mot accpeté=",mot_finale)
+    print("resultat=", calcul(mot_finale))
+    return 
 
-    if automate_num(etat, char_1) == 7:
-        return None
-
-    while True:
-        etat_3 = etat
-        for i in char_3:
-            etat_3 = automate_sim(automate, etat_3, i) 
-            # etat_3 = automate_num(etat_3, i)
-            # print(etat_test == etat_3)
-            # print(etat_3)
-            if etat_3 == 7:
-                stuck = 1
-                break
-
-        if stuck:
-            break
-        else:
-            # consume_char()
-            etat = automate_sim(automate, etat, char_1)
-            # lexeme += char_1
-            char_to_val(char_1)
-            char_1 = peek_char1()
-            char_3 = peek_char3()
+    
+    
     
 
-    # On verifie tout les 2 charactere s'ils nous ramenent a Rome (etat final)
-    # si c'est un etat final donc on accepte ce mot, on sait bien que le dernier charactere ca nous donne un etat puit
-    # On ne consume pas la caractère si on sait pas on est bien dans l'etat final
-    if automate_sim(automate,automate_sim(automate, etat, char_3[0]),char_3[1]) in (2,3,6):
-        # lexeme += char_3[0]
-        # lexeme += char_3[1]
-        char_to_val(char_3[0])
-        char_to_val(char_3[1])
-        # c'est juste pour dire que on est bien dans un etat final, on peut mettre 2 ou 3 ou 6
-        etat = 2
-        # consume_char()
-        # consume_char()
-    else:
-        if automate_sim(automate, etat, char_3[0]) in (2,3,6):
-            char_to_val(char_3[0])
-            # c'est juste pour dire que on est bien dans un etat final, on peut mettre 2 ou 3 ou 6
-            etat = 2
-            # lexeme += char_3[0]
-            # consume_char()
-    # if lexeme == "":
-    #     return None
-    # print(f"int_value = {int_value}, exp_value = {exp_value}, sign_value = {sign_value}, float_value = {float_value}")
-    if etat not in (2,3,6):
-        return None
-    # print(f"etat = {etat}")
-    return int_value * 10 ** (exp_value * sign_value + float_value)
 
-    # etat = 0
-    # next = peek_char1()
-    # mantisse = 0
-    # flottant_sym = ['e', 'E']
-    # i_flott = -1
-    # pow = 0
-    # sign = 1
-    # while True:
-    #     match etat:
-    #         case 0:
-    #             if next in defs.DIGITS:
-    #                 etat = 3
-    #                 mantisse = mantisse*10 + read_digit()
-    #             elif next == '.':
-    #                 etat = 1
-    #                 consume_char()
-    #             else:
-    #                 return None
-    #         case 1:
-    #             if next in defs.DIGITS:
-    #                 etat = 2
-    #                 mantisse = mantisse + read_digit()*10**i_flott
-    #                 i_flott -= 1
-    #             else:
-    #                 return None
-    #         case 2:
-    #             if next in defs.DIGITS:
-    #                 etat = 2
-    #                 mantisse = mantisse + read_digit()*10**i_flott
-    #                 i_flott -= 1
-    #             elif next in flottant_sym:
-    #                 etat = 4
-    #                 consume_char()
-    #             else:
-    #                 return mantisse
-    #         case 3:
-    #             if next in defs.DIGITS:
-    #                 etat = 3
-    #                 mantisse = mantisse * 10 + read_digit()
-    #             elif next in flottant_sym:
-    #                 etat = 4
-    #                 consume_char()
-    #             elif next == '.':
-    #                 etat = 2
-    #                 consume_char()
-    #             else: 
-    #                 return mantisse
-    #         case 4:
-    #             if next in defs.DIGITS:
-    #                 etat = 6
-    #                 pow = pow * 10 + read_digit()
-    #             elif next in ['+','-']:
-    #                 etat = 5
-    #                 if next == '-':
-    #                     sign = -1
-    #                 consume_char()
-    #             else:
-    #                 return mantisse
-    #         case 5:
-    #             if next in defs.DIGITS:
-    #                 etat = 6
-    #                 pow = pow*10 + read_digit()
-    #             else:
-    #                 return mantisse
-    #         case 6:
-    #             if next in defs.DIGITS:
-    #                 etat = 6
-    #                 pow = pow*10 + read_digit()
-    #             else:
-    #                 return mantisse*10**(pow*sign)
-    #     next = peek_char1()
-    # # return mantisse*10**(pow*sign);
-    # return None
+        
+
+        
+    
 
 
 # Parse un lexème (sans séparateurs) de l'entrée et renvoie son token.
 # Cela consomme tous les caractères du lexème lu.
 def read_token_after_separators():
-    # print("@ATTENTION: lexer.read_token_after_separators à finir !") # LIGNE A SUPPRIMER
-    num = read_NUM()
-    if num != None:
-        return (defs.V_T.NUM, num)
-    else:
-        n = peek_char1()
-        consume_char()
-        if n == '#':
-            num = read_INT()
-            # print(num)
-            return (defs.V_T.CALC, num)
-        elif n == '+':
-             return (defs.V_T.ADD, None)
-        elif n == '-':
-            return (defs.V_T.SUB, None)
-        elif n == '*':
-            return (defs.V_T.MUL, None)
-        elif n == '/':
-            return (defs.V_T.DIV, None)
-        elif n == '^':
-            return (defs.V_T.POW, None)
-        elif n == '!':
-            return (defs.V_T.FACT, None)
-        elif n == '(':
-            return (defs.V_T.OPAR, None)
-        elif n == ')':
-            return (defs.V_T.CPAR, None)
-        elif n == ';':
-            return (defs.V_T.SEQ, None)
-    return (defs.V_T.END, None)
+    print("@ATTENTION: lexer.read_token_after_separators à finir !") # LIGNE A SUPPRIMER
+    return (defs.V_T.END, None) # par défaut, on renvoie la fin de l'entrée
+
 
 # Donne le prochain token de l'entrée, en sautant les séparateurs éventuels en tête
 # et en consommant les caractères du lexème reconnu.
 def next_token():
-    # print("@ATTENTION: lexer.next_token à finir !") # LIGNE A SUPPRIMER
-    n = peek_char1()
-    while n in defs.SEP:
-        consume_char()
-        n = peek_char1()
+    print("@ATTENTION: lexer.next_token à finir !") # LIGNE A SUPPRIMER
     return read_token_after_separators()
 
 
@@ -511,6 +400,6 @@ def test_lexer():
 
 if __name__ == "__main__":
     ## Choisir une seule ligne à décommenter
-    # test_INT_to_EOI()
-    # test_FLOAT_to_EOI()
+    #test_INT_to_EOI()
+    #test_FLOAT_to_EOI()
     test_lexer()
