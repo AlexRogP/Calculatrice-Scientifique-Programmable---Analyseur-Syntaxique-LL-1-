@@ -174,7 +174,7 @@ def read_INT():
     c=peek_char1()
     number=['0','1','2','3','4','5','6','7','8','9']
     nombre=""
-    while c in number:
+    while c !=defs.EOI and c in number:
         nombre+=c
         consume_char()
         c=peek_char1()
@@ -274,7 +274,7 @@ def read_NUMBER_to_EOI(mot):
             return True
         mot = mot[1:] 
         c=mot[0]
-        while c!= dernier_car and c!='E' and c!='e' and c!='.':
+        while (c!= dernier_car or len(mot)>1) and c!='E' and c!='e' and c!='.':
             if c in interger:
                 mot = mot[1:] 
                 c=mot[0]
@@ -344,30 +344,102 @@ def read_NUM():
         return
     print("mot accpeté=",mot_finale)
     print("resultat=", calcul(mot_finale))
-    return 
-
-    
-    
-    
-
-
-        
-
-        
-    
+    return   
 
 
 # Parse un lexème (sans séparateurs) de l'entrée et renvoie son token.
 # Cela consomme tous les caractères du lexème lu.
 def read_token_after_separators():
-    print("@ATTENTION: lexer.read_token_after_separators à finir !") # LIGNE A SUPPRIMER
-    return (defs.V_T.END, None) # par défaut, on renvoie la fin de l'entrée
+    #print("@ATTENTION: lexer.read_token_after_separators à finir !") # LIGNE A SUPPRIMER
+    integer=["0","1","2","3","4","5","6","7","8","9"]
+    mot_final=""
+    c=peek_char1()
+    if c=="#":
+        res=read_INT()
+        return (defs.TOKEN_MAP["CALC"],res)
+    elif c=="." or c in integer:
+        while c!=defs.EOI:
+            mot_final+=c
+            consume_char() 
+            c=peek_char1()
+        while mot_final!="" and not read_NUMBER_to_EOI(mot_final):
+            mot_final=mot_final[:-1]
+        return (defs.TOKEN_MAP["NUM"],calcul(mot_final))
+    else:
+        lex=""
+        if c=="+":
+            lex="ADD"
+        elif c=="-":
+            lex="SUB"
+        elif c=="*":
+            lex="MUL"
+        elif c=="/":
+            lex="DIV"
+        elif c=="^":
+            lex="POW"
+        elif c=="!":
+            lex="FACT"
+        elif c=="(":
+            lex="OPAR"
+        elif c==")":
+            lex="CPAR"
+        elif c==";":
+            lex="SEQ"
+        else:
+            lex="END"
+        return (defs.TOKEN_MAP[lex],None)
 
 
 # Donne le prochain token de l'entrée, en sautant les séparateurs éventuels en tête
 # et en consommant les caractères du lexème reconnu.
 def next_token():
-    print("@ATTENTION: lexer.next_token à finir !") # LIGNE A SUPPRIMER
+    #print("@ATTENTION: lexer.next_token à finir !") # LIGNE A SUPPRIMER
+    mot=peek_char3()
+    a=""
+    b=""
+    c=""
+    if len(mot)>=3:
+        a=mot[0]
+        b=mot[1]
+        c=mot[2]
+    elif len(mot)==2:
+        a=mot[0]
+        b=mot[1]
+    elif len(mot)==1:
+        a=mot[0]
+    else:
+        return read_token_after_separators()
+    sep=True
+    while sep :
+        if a not in defs.SEP:
+            sep=False
+        elif b not in defs.SEP:
+            consume_char()
+            sep=False
+        elif c not in defs.SEP:
+            consume_char()
+            consume_char()
+            sep=False
+        else:
+            consume_char()
+            consume_char()
+            consume_char()
+            mot=peek_char3()
+            a=""
+            b=""
+            c=""
+            if len(mot)>=3:
+                a=mot[0]
+                b=mot[1]
+                c=mot[2]
+            elif len(mot)==2:
+                a=mot[0]
+                b=mot[1]
+            elif len(mot)==1:
+                a=mot[0]
+            else:
+                return read_token_after_separators()
+
     return read_token_after_separators()
 
 
