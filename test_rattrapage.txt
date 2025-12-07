@@ -7,8 +7,15 @@ Voici les tests effectués pour rattrapage.py et qui fonctionne:
 3+/*;
 3+4) ;
 3+4
-
+3+)4(;
+3+()4;
+3+()*4;
+3*()+4;
+3/()4;
+3*()4
+()
+();
+45+;
 
 Voici les tests qui ne fonctionne pas :
-
 

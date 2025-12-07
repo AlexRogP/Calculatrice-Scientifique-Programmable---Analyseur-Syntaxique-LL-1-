@@ -1,5 +1,3 @@
-Grammaire fonctionnant pour enormément de cas pour Q13
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -131,7 +129,7 @@ def parse_A(current,n1,l):
         current = get_current()
         if current not in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
             # Erreur → rattrapage
-            current = recover([V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR, V_T.SEQ, V_T.CPAR, V_T.END])
+            current = recover([V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR, V_T.SEQ, V_T.END])
             # Si après recover on tombe sur un vrai début d'expression, on continue
             if current in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
                 n2 = parse_E4(current,l)
@@ -371,4 +369,3 @@ if __name__ == "__main__":
         print("@ Input OK ")
     else:
         print("@ result = ", repr(result))
-

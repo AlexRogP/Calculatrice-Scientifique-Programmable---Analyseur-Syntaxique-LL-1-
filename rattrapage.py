@@ -129,7 +129,7 @@ def parse_A(current,n1,l):
         current = get_current()
         if current not in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
             # Erreur → rattrapage
-            current = recover([V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR, V_T.SEQ, V_T.CPAR, V_T.END])
+            current = recover([V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR, V_T.SEQ, V_T.END])
             # Si après recover on tombe sur un vrai début d'expression, on continue
             if current in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
                 n2 = parse_E4(current,l)
@@ -181,7 +181,7 @@ def parse_Y(current,n1,l):
         if current not in [V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.MUL,V_T.DIV]:
             current=recover([V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.MUL,V_T.DIV])
             if current==V_T.END:
-                return n1
+                return n2
         n3=parse_Y(current,n2,l)
         return n3
     elif current in [V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR]:
@@ -327,6 +327,12 @@ def parse_E0(current,l):
         consume_token(V_T.OPAR)
         current=get_current()
         if current not in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
+            current=recover([V_T.SUB,V_T.NUM,V_T.CALC,V_T.SEQ,V_T.CPAR])
+            if current in [V_T.SEQ,V_T.END]:
+                return 0 # element neutre mais qui pourrait poser problème en fonction de si on a une addition, soustraction , multiplication , division
+        if current==V_T.CPAR:
+            consume_token(current)
+            current=get_current()
             current=recover([V_T.SUB,V_T.NUM,V_T.CALC,V_T.SEQ,V_T.CPAR])
             if current in [V_T.SEQ,V_T.END]:
                 return 0 # element neutre mais qui pourrait poser problème en fonction de si on a une addition, soustraction , multiplication , division
