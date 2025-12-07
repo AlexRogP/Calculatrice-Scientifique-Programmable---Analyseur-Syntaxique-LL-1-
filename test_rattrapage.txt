@@ -1,0 +1,14 @@
+Voici les tests effectués pour rattrapage.py et qui fonctionne:
+(((12);
+3+*4;
+(3+4;
+3+;
+3+*;
+3+/*;
+3+4) ;
+3+4
+
+
+Voici les tests qui ne fonctionne pas :
+
+
