@@ -1,0 +1,364 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Projet TL : parser - requires Python version >= 3.10
+"""
+
+import sys
+from math import factorial
+assert sys.version_info >= (3, 10), "Use Python 3.10 or newer !"
+
+import lexer
+from definitions import V_T, str_attr_token
+import definitions as defs
+
+#####
+# Variables internes (à ne pas utiliser directement)
+
+_current_token = V_T.END
+_value = None  # attribut du token renvoyé par le lexer
+
+#####
+# Fonctions génériques
+
+class ParserError(Exception):
+    pass
+
+def unexpected_token(expected):
+    return ParserError("Found token '" + str_attr_token(_current_token, _value) + "' but expected " + expected)
+
+def get_current():
+    return _current_token
+
+def init_parser(stream):
+    global _current_token, _value
+    lexer.reinit(stream)
+    _current_token, _value = lexer.next_token()
+    #print("@ init parser on",  repr(str_attr_token(_current, _value)))  # for DEBUGGING
+
+def consume_token(tok):
+    # Vérifie que le prochain token est tok ;
+    # si oui, le consomme et renvoie son attribut ; si non, lève une exception
+    global _current_token, _value
+    if _current_token != tok:
+        raise unexpected_token(tok.name)
+    if _current_token != V_T.END:
+        old = _value
+        _current_token, _value = lexer.next_token()
+        return old
+
+def recover(suiv):
+    current=get_current()
+    while current not in suiv and current!=V_T.END and current!=V_T.SEQ:
+        consume_token(current)
+        current=get_current()
+    return current
+
+#########################
+## Parsing de input et exp
+
+def parse_input():
+    #print("@ATTENTION: parser.parse_input à corriger !") # LIGNE A SUPPRIMER
+    current=get_current()
+    if current in [V_T.NUM,V_T.SUB,V_T.CALC,V_T.OPAR,V_T.END]:
+        return parse_S(current,[])
+    else:
+        current= recover([V_T.NUM,V_T.SUB,V_T.CALC,V_T.OPAR,V_T.END])
+        return parse_S(current,[])
+
+def parse_S(current,tab):
+    if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
+        n1=parse_T(current,tab) #la
+        current=get_current()
+        n2=parse_S(current,tab+[n1])
+        return [n1]+n2
+    elif current==V_T.END:
+        return []
+    else:
+        # Erreur → on saute jusqu'à un point de synchronisation
+        current = recover([V_T.SEQ, V_T.CPAR, V_T.END])
+        # On ne relance pas directement parse_E5 pour éviter une boucle infinie
+        # On retourne une valeur neutre (0 ou None) ou on garde la valeur précédente
+        return []
+
+def parse_T(current,l):
+    if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
+        n1=parse_E5(current,l)#la
+        consume_token(V_T.SEQ)
+        return n1
+    else:
+        # Erreur → on saute jusqu'à un point de synchronisation
+        current = recover([V_T.SEQ, V_T.CPAR, V_T.END])
+        # On ne relance pas directement parse_E5 pour éviter une boucle infinie
+        # On retourne une valeur neutre (0 ou None) ou on garde la valeur précédente
+        return 0
+    
+def parse_E5(current,l):
+    if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
+        n1=parse_E4(current,l)
+        current=get_current()
+        n2=parse_X(current,n1,l)#ici
+        return n2
+    else:
+        # Erreur → on saute jusqu'à un point de synchronisation
+        current = recover([V_T.SEQ, V_T.CPAR, V_T.END])
+        # On ne relance pas directement parse_E5 pour éviter une boucle infinie
+        # On retourne une valeur neutre (0 ou None) ou on garde la valeur précédente
+        return 0
+
+def parse_X(current,n1,l):
+    if current in [V_T.ADD, V_T.SUB]:
+        n2=parse_A(current,n1,l)#la
+        current=get_current()
+        n3=parse_X(current,n2,l)
+        return n3
+    elif current in [V_T.SEQ,V_T.CPAR]:
+        return n1
+    else:
+        current = recover([V_T.SEQ, V_T.CPAR, V_T.END])
+        return 0
+
+def parse_A(current,n1,l):
+    if current == V_T.ADD:
+        consume_token(V_T.ADD) 
+        current = get_current()
+        if current not in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
+            # Erreur → rattrapage
+            current = recover([V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR, V_T.SEQ, V_T.CPAR, V_T.END])
+            # Si après recover on tombe sur un vrai début d'expression, on continue
+            if current in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
+                n2 = parse_E4(current,l)
+                return n1 + n2
+            # Sinon, on abandonne et retourne n1
+            return n1
+        n2 = parse_E4(current,l)
+        return n1 + n2
+
+    elif current==V_T.SUB:
+        consume_token(V_T.SUB)
+        current=get_current()
+        if current not in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
+            # Erreur → rattrapage
+            current = recover([V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR, V_T.SEQ, V_T.CPAR, V_T.END])
+            # Si après recover on tombe sur un vrai début d'expression, on continue
+            if current in [V_T.NUM, V_T.CALC, V_T.SUB, V_T.OPAR]:
+                n2 = parse_E4(current,l)
+                return n1 - n2
+        n2=parse_E4(current,l)
+        return n1-n2
+    elif current in [V_T.SEQ, V_T.END, V_T.CPAR]:
+        return n1
+    else:
+        recover([V_T.SEQ, V_T.CPAR, V_T.END])
+        return n1
+
+def parse_E4(current,l):
+    if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
+        n1=parse_E3(current,l)
+        current=get_current()
+        if current not in [V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.MUL,V_T.DIV]:
+            current=recover([V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.MUL,V_T.DIV])
+            if current==V_T.END:
+                return 0
+        n2=parse_Y(current,n1,l)
+        return n2
+    else:
+        current= recover [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SEQ,V_T.CPAR]
+        if current in [V_T.SEQ,V_T.END,V_T.CPAR]:
+            return 0
+        else:
+            return parse_E4(current,l)
+
+def parse_Y(current,n1,l):
+    if current in [V_T.MUL,V_T.DIV]:
+        n2=parse_B(current,n1,l)
+        current=get_current()
+        if current not in [V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.MUL,V_T.DIV]:
+            current=recover([V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.MUL,V_T.DIV])
+            if current==V_T.END:
+                return n1
+        n3=parse_Y(current,n2,l)
+        return n3
+    elif current in [V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR]:
+        return n1
+    else:
+        # Si carcatères imprévu , on cherche le prochain valide
+        current=recover([V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.MUL,V_T.DIV])
+        #Si c'est END alors fais expression on renvoie valeur neutre (ici l'argument)
+        if current==V_T.END:
+            return n1
+        # Si on retrouve un carctères valide alors on continue l'expression
+        else:
+            return parse_Y(current,n1,l)
+
+def parse_B(current,n1,l):
+    if current==V_T.MUL:
+        consume_token(V_T.MUL)
+        current=get_current()
+        if current not in [V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB]:
+            current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB,V_T.SEQ,V_T.CPAR])
+            if current in [V_T.SEQ,V_T.CPAR,V_T.END]:
+                return n1
+        n2=parse_E3(current,l)
+        return n1*n2
+    elif current==V_T.DIV:
+        consume_token(V_T.DIV)
+        current=get_current()
+        if current not in [V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB]:
+            current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB,V_T.SEQ,V_T.CPAR])
+            if current in [V_T.SEQ,V_T.CPAR,V_T.END]:
+                return n1
+        n2=parse_E3(current,l)
+        return n1/n2
+    else:
+        # Si carcatères imprévu , on cherche le prochain valide
+        current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB])
+        #Si c'est la fin de l'expression on renvoie valeur neutre (ici l'argument)
+        if current==[V_T.SEQ,V_T.CPAR,V_T.END]:
+            return n1
+        # Si on retrouve un carctères valide alors on continue l'expression
+        else:
+            return parse_B(current,n1,l)
+
+def parse_E3(current,l):
+    if current==V_T.SUB:
+        consume_token(V_T.SUB)
+        current=get_current()
+        if current not in [V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB]:
+            current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB,V_T.SEQ,V_T.CPAR])
+            if current in [V_T.SEQ,V_T.CPAR,V_T.END]:
+                return 1 # valeur neutre pour multiplication et division
+        n1=parse_E3(current,l)
+        return -n1
+    elif current in [V_T.NUM,V_T.CALC,V_T.OPAR]:
+        n1=parse_E2(current,l)
+        return n1
+    else:
+        current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SUB,V_T.SEQ,V_T.CPAR])
+        if current in [V_T.SEQ,V_T.CPAR,V_T.END]:
+            return 1 #Valeur neutre
+        else:
+            return parse_E3(current,l)
+
+def parse_E2(current,l):
+    if current in [V_T.NUM,V_T.CALC,V_T.OPAR]:
+        n1=parse_E1(current,l)
+        current=get_current()
+        if current not in [V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.FACT]:
+            current=recover([V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.FACT])
+            if current in [V_T.END]:
+                return n1 # valeur neutre pour multiplication et division
+        n2=parse_C(current,n1,l)
+        return n2
+    else:
+        current=recover([V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR])
+        if current ==V_T.END:
+            return 1 # element neutre car servira après à adivision ou multiplication
+        else:
+            return parse_E2(current,l)
+
+def parse_C(current,n1,l):
+    if current==V_T.FACT:
+        consume_token(V_T.FACT)
+        current=get_current()
+        if current not in [V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.FACT]:
+            current=recover([V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.FACT])
+            if current in [V_T.END]:
+                return n1 # valeur neutre 
+        n2=parse_C(current,factorial(n1),l)
+        return n2
+    elif current in [V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR]:
+        return n1
+    else:
+        current=recover([V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.FACT])
+        if current ==V_T.END:
+            return n1 # element neutre 
+        else:
+            return parse_C(current,n1,l)
+
+def parse_E1(current,l):
+    if current in [V_T.NUM,V_T.CALC,V_T.OPAR]:
+        n1=parse_E0(current,l)
+        current=get_current()
+        if current not in [V_T.FACT,V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.POW]:
+            current=recover([V_T.FACT,V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR,V_T.POW])
+            if current==V_T.END:
+                return n1
+        n2=parse_D(current,n1,l)
+        return n2
+    else:
+        current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SEQ,V_T.CPAR])
+        if current in [V_T.SEQ,V_T.CPAR,V_T.END]:
+            return 1 # element neutre
+        else:
+            return parse_E1(current,l)
+
+def parse_D(current,n1,l):
+    if current==V_T.POW:
+        consume_token(V_T.POW)
+        current=get_current()
+        if current not in [V_T.NUM,V_T.CALC,V_T.OPAR]:
+            current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SEQ,V_T.CPAR])
+            if current in [V_T.SEQ,V_T.CPAR,V_T.END]:
+                return n1 # element neutre
+        n2=parse_E1(current,l)
+        return pow(n1,n2)
+    elif current in [V_T.FACT,V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR]:
+        return n1
+    else:
+        current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SEQ,V_T.CPAR])
+        if current in [V_T.SEQ,V_T.CPAR,V_T.END]:
+            return n1 # element neutre
+        else:
+            return parse_E1(current,l)
+
+def parse_E0(current,l):
+    if current==V_T.NUM:
+        return consume_token(V_T.NUM)#la renvoie 3 puis 4
+    elif current==V_T.CALC:
+        i=consume_token(V_T.CALC)
+        return l[i-1]
+    elif current==V_T.OPAR:
+        consume_token(V_T.OPAR)
+        current=get_current()
+        if current not in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
+            current=recover([V_T.SUB,V_T.NUM,V_T.CALC,V_T.SEQ,V_T.CPAR])
+            print("current=",current)
+            if current in [V_T.SEQ,V_T.END]:
+                return 0
+        res=parse_E5(current,l)
+        consume_token(V_T.CPAR)
+        return res
+    else:
+        current=recover([V_T.NUM,V_T.CALC,V_T.OPAR,V_T.SEQ,V_T.CPAR])
+        if current in [V_T.CPAR,V_T.SEQ,V_T.END]:
+            return 0 #ici en fonction de addition , soustraction ,multiplication ou division l'élément neutre n'est pas le meme 
+        else:
+            return parse_E0(current,l)
+
+    
+
+#####################################
+## Fonction principale de la calculatrice
+## Appelle l'analyseur grammatical et retourne
+## - None sans les attributs
+## - la liste des valeurs des calculs avec les attributs
+
+def parse(stream=sys.stdin):
+    init_parser(stream)
+    l = parse_input()
+    print("l=",l)
+    consume_token(V_T.END)
+    return l
+
+#####################################
+## Test depuis la ligne de commande
+
+
+if __name__ == "__main__":
+    print("@ Testing the calculator in infix syntax.")
+    result = parse()
+    if result is None:
+        print("@ Input OK ")
+    else:
+        print("@ result = ", repr(result))

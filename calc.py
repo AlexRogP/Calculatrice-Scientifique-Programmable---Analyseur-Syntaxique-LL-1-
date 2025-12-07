@@ -47,8 +47,6 @@ def consume_token(tok):
         _current_token, _value = lexer.next_token()
         return old
 
-#Cette fonction recevra une tableau où il y aura ";" et créerra plusieurs tableau avec ceci
-#Ex: separe([45,"+",74;12,"*",3,";"])=["45+74","12*3"]
 
 #########################
 ## Parsing de input et exp
@@ -57,161 +55,161 @@ def parse_input():
     #print("@ATTENTION: parser.parse_input à corriger !") # LIGNE A SUPPRIMER
     current=get_current()
     if current in [V_T.NUM,V_T.SUB,V_T.CALC,V_T.OPAR,V_T.END]:
-        parse_S()
-        return None
+        return parse_S(current,[])
     raise ParserError("Input")
 
-def parse_S():
-    current=get_current()
+def parse_S(current,tab):
     if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
-        parse_T() #Là
-        parse_S()
-        return
+        n1=parse_T(current,tab)#là
+        current=get_current()
+        n2=parse_S(current,tab+[n1])
+        return [n1]+n2
     elif current==V_T.END:
-        return
+        return []
     else:
         raise ParserError("S")
 
-def parse_T():
-    current=get_current()
+def parse_T(current,l):
     if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
-        parse_E5()#là
+        n1=parse_E5(current,l)#là
         consume_token(V_T.SEQ)
-        return
+        return n1
     else:
         raise ParserError("T")
     
-def parse_E5():
-    current=get_current()
+def parse_E5(current,l):
     if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
-        parse_E4()#là
-        parse_X()
-        return
+        n1=parse_E4(current,l)#là
+        current=get_current()
+        n2=parse_X(current,n1,l)
+        return n2
     else:
         raise ParserError("E5")
 
-def parse_X():
-    current=get_current()
+def parse_X(current,n1,l):
     if current in [V_T.ADD, V_T.SUB]:
-        parse_A()
-        parse_X()
-        return
+        n2=parse_A(current,n1,l)#ici
+        current=get_current()
+        n3=parse_X(current,n2,l)
+        return n3
     elif current in [V_T.SEQ,V_T.CPAR]:
-        return
+        return n1
     else:
         raise ParserError("X")
 
-def parse_A():
-    current=get_current()
+def parse_A(current,n1,l):
     if current==V_T.ADD:
         consume_token(V_T.ADD)
-        parse_E4()
-        return
+        current=get_current()
+        n2=parse_E4(current,l)#ici current =#9
+        return n1+n2
     elif current==V_T.SUB:
         consume_token(V_T.SUB)
-        parse_E4()
-        return
+        current=get_current()
+        n2=parse_E4(current,l)
+        return n1-n2
     else:
         raise ParserError("A")
 
-def parse_E4():
-    current=get_current()
+def parse_E4(current,l):
     if current in [V_T.SUB,V_T.NUM,V_T.CALC,V_T.OPAR]:
-        parse_E3()#là
-        parse_Y()
-        return
+        n1=parse_E3(current,l)#là #ici
+        current=get_current()
+        n2=parse_Y(current,n1,l)#ici
+        return n2
     else:
         raise ParserError("E4")
 
-def parse_Y():
-    current=get_current()
+def parse_Y(current,n1,l):
     if current in [V_T.MUL,V_T.DIV]:
-        parse_B()
-        parse_Y()
-        return
+        n2=parse_B(current,n1,l)
+        current=get_current()
+        n3=parse_Y(current,n2,l)
+        return n3
     elif current in [V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR]:
-        return
+        return n1
     else:
         raise ParserError("Y")
 
-def parse_B():
-    current=get_current()
+def parse_B(current,n1,l):
     if current==V_T.MUL:
         consume_token(V_T.MUL)
-        parse_E3()
-        return
+        current=get_current()
+        n2=parse_E3(current,l)
+        return n1*n2
     elif current==V_T.DIV:
         consume_token(V_T.DIV)
-        parse_E3()
-        return
+        current=get_current()
+        n2=parse_E3(current,l)
+        return n1/n2
     else:
         raise ParserError("B")
 
-def parse_E3():
-    current=get_current()
+def parse_E3(current,l):
     if current==V_T.SUB:
         consume_token(V_T.SUB)
-        parse_E3()
-        return
+        current=get_current()
+        n1=parse_E3(current,l)
+        return -n1
     elif current in [V_T.NUM,V_T.CALC,V_T.OPAR]:
-        parse_E2()#là
-        return
+        n1=parse_E2(current,l)#là #ici
+        return n1
     else:
         raise ParserError("E3")
 
-def parse_E2():
-    current=get_current()
+def parse_E2(current,l):
     if current in [V_T.NUM,V_T.CALC,V_T.OPAR]:
-        parse_E1()#là
-        parse_C()
-        return
+        n1=parse_E1(current,l)#là #ici
+        current=get_current()
+        n2=parse_C(current,n1,l)
+        return n2
     else:
         raise ParserError("E2")
 
-def parse_C():
-    current=get_current()
+def parse_C(current,n1,l):
     if current==V_T.FACT:
         consume_token(V_T.FACT)
-        parse_C()
-        return
+        current=get_current()
+        n2=parse_C(current,factorial(n1),l)
+        return n2
     elif current in [V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR]:
-        return
+        return n1
     else:
         raise ParserError("C")
 
-def parse_E1():
-    current=get_current()
+def parse_E1(current,l):
     if current in [V_T.NUM,V_T.CALC,V_T.OPAR]:
-        parse_E0()#là #fini
-        parse_D()#ici, il reste ";"
-        return
+        n1=parse_E0(current,l)#=10 #ici
+        current=get_current()
+        n2=parse_D(current,n1,l)
+        return n2
     else:
         raise ParserError("E1")
 
-def parse_D():
-    current=get_current()
+def parse_D(current,n1,l):
     if current==V_T.POW:
         consume_token(V_T.POW)
-        parse_E1()
-        return
+        current=get_current()
+        n2=parse_E1(current,l)
+        return pow(n1,n2)
     elif current in [V_T.FACT,V_T.MUL,V_T.DIV,V_T.ADD,V_T.SUB,V_T.SEQ,V_T.CPAR]:
-        return
+        return n1
     else:
         raise ParserError("D")
 
-def parse_E0():
-    current=get_current()
+def parse_E0(current,l):
     if current==V_T.NUM:
-        consume_token(V_T.NUM)
-        return
+        return consume_token(V_T.NUM)# donne 10
     elif current==V_T.CALC:
-        consume_token(V_T.CALC)#là fin , il nous reste ";"
-        return
+        i=consume_token(V_T.CALC) #=9
+        #print("i=",i,"l=",l) #i=9
+        return l[i-1]
     elif current==V_T.OPAR:
         consume_token(V_T.OPAR)
-        parse_E5()
+        current=get_current()
+        res=parse_E5(current,l)
         consume_token(V_T.CPAR)
-        return
+        return res
     else:
         raise ParserError("E0")
 

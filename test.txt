@@ -1,0 +1,413 @@
+@ 'lexer.read_INT_to_EOI' on '1234567890098700' expect: True
+@ 'lexer.read_INT_to_EOI' on '203' expect: True
+@ 'lexer.read_INT_to_EOI' on '0000' expect: True
+@ 'lexer.read_INT_to_EOI' on '0' expect: True
+@ 'lexer.read_INT_to_EOI' on '1' expect: True
+@ 'lexer.read_INT_to_EOI' on '2' expect: True
+@ 'lexer.read_INT_to_EOI' on '3' expect: True
+@ 'lexer.read_INT_to_EOI' on '4' expect: True
+@ 'lexer.read_INT_to_EOI' on '5' expect: True
+@ 'lexer.read_INT_to_EOI' on '6' expect: True
+@ 'lexer.read_INT_to_EOI' on '7' expect: True
+@ 'lexer.read_INT_to_EOI' on '8' expect: True
+@ 'lexer.read_INT_to_EOI' on '9' expect: True
+@----  lexer.read_INT_to_EOI => True  PASSED!
+
+@ 'lexer.read_INT_to_EOI' on '' expect: False
+@ 'lexer.read_INT_to_EOI' on '123e' expect: False
+@ 'lexer.read_INT_to_EOI' on '000e' expect: False
+@ 'lexer.read_INT_to_EOI' on '2.5' expect: False
+@ 'lexer.read_INT_to_EOI' on '.5' expect: False
+@ 'lexer.read_INT_to_EOI' on '0.0' expect: False
+@ 'lexer.read_INT_to_EOI' on '3.' expect: False
+@ 'lexer.read_INT_to_EOI' on '1e5' expect: False
+@ 'lexer.read_INT_to_EOI' on '2e+5' expect: False
+@ 'lexer.read_INT_to_EOI' on '1e-5' expect: False
+@ 'lexer.read_INT_to_EOI' on '-25' expect: False
+@----  lexer.read_INT_to_EOI => False  PASSED!
+
+@ 'lexer.read_INT_to_EOI' on 'a2' expect: None
+@ 'lexer.read_INT_to_EOI' on '0a0' expect: None
+@ 'lexer.read_INT_to_EOI' on '1a0' expect: None
+@----  lexer.read_INT_to_EOI => None  PASSED!
+
+@ 'lexer.read_FLOAT_to_EOI' on '4.' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '5.4' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '.5' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '0123.' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '.123' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '678.876' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '0.' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '000.000' expect: True
+@ 'lexer.read_FLOAT_to_EOI' on '.0' expect: True
+@----  lexer.read_FLOAT_to_EOI => True  PASSED!
+
+@ 'lexer.read_FLOAT_to_EOI' on '123' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '0' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '1' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '.' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '.123e5' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '1.e+5' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '2e5' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '1.5e+6' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '' expect: False
+@ 'lexer.read_FLOAT_to_EOI' on '-.5' expect: False
+@----  lexer.read_FLOAT_to_EOI => False  PASSED!
+
+@ 'lexer.read_FLOAT_to_EOI' on '1.a2' expect: None
+@ 'lexer.read_FLOAT_to_EOI' on '0.a0' expect: None
+@ 'lexer.read_FLOAT_to_EOI' on '1a.' expect: None
+@----  lexer.read_FLOAT_to_EOI => None  PASSED!
+
+@----  lexer.read_INT
+@ 'lexer.read_INT' on '1234567890098700' expect: 1234567890098700.0
+@ 'lexer.read_INT' on '203' expect: 203.0
+@ 'lexer.read_INT' on '0000' expect: 0.0
+@ 'lexer.read_INT' on '0' expect: 0.0
+@ 'lexer.read_INT' on '1' expect: 1.0
+@ 'lexer.read_INT' on '2' expect: 2.0
+@ 'lexer.read_INT' on '3' expect: 3.0
+@ 'lexer.read_INT' on '4' expect: 4.0
+@ 'lexer.read_INT' on '5' expect: 5.0
+@ 'lexer.read_INT' on '6' expect: 6.0
+@ 'lexer.read_INT' on '7' expect: 7.0
+@ 'lexer.read_INT' on '8' expect: 8.0
+@ 'lexer.read_INT' on '9' expect: 9.0
+
+@----  lexer.read_INT
+@ 'lexer.read_INT' on '01' expect: 1
+@ 'lexer.read_INT' on '123e' expect: 123
+@ 'lexer.read_INT' on '000e' expect: 0
+@ 'lexer.read_INT' on '2.5' expect: 2
+@ 'lexer.read_INT' on '0.0' expect: 0
+@ 'lexer.read_INT' on '3.' expect: 3
+@ 'lexer.read_INT' on '1e5' expect: 1
+@ 'lexer.read_INT' on '2e+5' expect: 2
+@ 'lexer.read_INT' on '1e-5' expect: 1
+@ 'lexer.read_INT' on '' expect: None
+@ 'lexer.read_INT' on '.5' expect: None
+@ 'lexer.read_INT' on '-25' expect: None
+@ 'lexer.read_INT' on 'a2' expect: None
+@ 'lexer.read_INT' on '0a0' expect: None
+@ 'lexer.read_INT' on '1a0' expect: None
+
+@----  lexer.read_NUM
+@ 'lexer.read_NUM' on '1234567890098700' expect: 1234567890098700.0
+mot_finale= 1234567890098700$
+mot accpeté= 1234567890098700
+resultat= 1234567890098700.0
+@ 'lexer.read_NUM' on '203' expect: 203.0
+mot_finale= 203$
+mot accpeté= 203
+resultat= 203.0
+@ 'lexer.read_NUM' on '0000' expect: 0.0
+mot_finale= 0000$
+mot accpeté= 0000
+resultat= 0.0
+@ 'lexer.read_NUM' on '0' expect: 0.0
+mot_finale= 0$
+mot accpeté= 0
+resultat= 0.0
+@ 'lexer.read_NUM' on '1' expect: 1.0
+mot_finale= 1$
+mot accpeté= 1
+resultat= 1.0
+@ 'lexer.read_NUM' on '2' expect: 2.0
+mot_finale= 2$
+mot accpeté= 2
+resultat= 2.0
+@ 'lexer.read_NUM' on '3' expect: 3.0
+mot_finale= 3$
+mot accpeté= 3
+resultat= 3.0
+@ 'lexer.read_NUM' on '4' expect: 4.0
+mot_finale= 4$
+mot accpeté= 4
+resultat= 4.0
+@ 'lexer.read_NUM' on '5' expect: 5.0
+mot_finale= 5$
+mot accpeté= 5
+resultat= 5.0
+@ 'lexer.read_NUM' on '6' expect: 6.0
+mot_finale= 6$
+mot accpeté= 6
+resultat= 6.0
+@ 'lexer.read_NUM' on '7' expect: 7.0
+mot_finale= 7$
+mot accpeté= 7
+resultat= 7.0
+@ 'lexer.read_NUM' on '8' expect: 8.0
+mot_finale= 8$
+mot accpeté= 8
+resultat= 8.0
+@ 'lexer.read_NUM' on '9' expect: 9.0
+mot_finale= 9$
+mot accpeté= 9
+resultat= 9.0
+@ 'lexer.read_NUM' on '4.' expect: 4.0
+mot_finale= 4.$
+mot accpeté= 4.
+resultat= 4.0
+@ 'lexer.read_NUM' on '5.4' expect: 5.4
+mot_finale= 5.4$
+mot accpeté= 5.4
+resultat= 5.4
+@ 'lexer.read_NUM' on '.5' expect: 0.5
+mot_finale= .5$
+mot accpeté= .5
+resultat= 0.5
+@ 'lexer.read_NUM' on '0123.' expect: 123.0
+mot_finale= 0123.$
+mot accpeté= 0123.
+resultat= 123.0
+@ 'lexer.read_NUM' on '.123' expect: 0.123
+mot_finale= .123$
+mot accpeté= .123
+resultat= 0.123
+@ 'lexer.read_NUM' on '678.876' expect: 678.876
+mot_finale= 678.876$
+mot accpeté= 678.876
+resultat= 678.876
+@ 'lexer.read_NUM' on '0.' expect: 0.0
+mot_finale= 0.$
+mot accpeté= 0.
+resultat= 0.0
+@ 'lexer.read_NUM' on '000.000' expect: 0.0
+mot_finale= 000.000$
+mot accpeté= 000.000
+resultat= 0.0
+@ 'lexer.read_NUM' on '.0' expect: 0.0
+mot_finale= .0$
+mot accpeté= .0
+resultat= 0.0
+@ 'lexer.read_NUM' on '1e5' expect: 100000.0
+mot_finale= 1e5$
+mot= e5$
+mot accpeté= 1e5
+resultat= 100000.0
+@ 'lexer.read_NUM' on '1e+5' expect: 100000.0
+mot_finale= 1e+5$
+mot= e+5$
+mot accpeté= 1e+5
+resultat= 100000.0
+@ 'lexer.read_NUM' on '1e-5' expect: 1e-05
+mot_finale= 1e-5$
+mot= e-5$
+mot accpeté= 1e-5
+resultat= 1e-05
+@ 'lexer.read_NUM' on '1234567890098700e-1234567890098700' expect: 0.0
+mot_finale= 1234567890098700e-1234567890098700$
+mot= e-1234567890098700$
+mot accpeté= 1234567890098700e-1234567890098700
+resultat= 0.0
+@ 'lexer.read_NUM' on '1234567890098700e123' expect: 1.2345678900987e+138
+mot_finale= 1234567890098700e123$
+mot= e123$
+mot accpeté= 1234567890098700e123
+resultat= 1.2345678900987e+138
+@ 'lexer.read_NUM' on '203E203' expect: 2.03e+205
+mot_finale= 203E203$
+mot= E203$
+mot accpeté= 203E203
+resultat= 2.03e+205
+@ 'lexer.read_NUM' on '000e+125' expect: 0.0
+mot_finale= 000e+125$
+mot= e+125$
+mot accpeté= 000e+125
+resultat= 0.0
+@ 'lexer.read_NUM' on '0e-3' expect: 0.0
+mot_finale= 0e-3$
+mot= e-3$
+mot accpeté= 0e-3
+resultat= 0.0
+@ 'lexer.read_NUM' on '1E+4' expect: 10000.0
+mot_finale= 1E+4$
+mot= E+4$
+mot accpeté= 1E+4
+resultat= 10000.0
+@ 'lexer.read_NUM' on '2e0' expect: 2.0
+mot_finale= 2e0$
+mot= e0$
+mot accpeté= 2e0
+resultat= 2.0
+@ 'lexer.read_NUM' on '3E0' expect: 3.0
+mot_finale= 3E0$
+mot= E0$
+mot accpeté= 3E0
+resultat= 3.0
+@ 'lexer.read_NUM' on '4e6' expect: 4000000.0
+mot_finale= 4e6$
+mot= e6$
+mot accpeté= 4e6
+resultat= 4000000.0
+@ 'lexer.read_NUM' on '5e-5' expect: 5e-05
+mot_finale= 5e-5$
+mot= e-5$
+mot accpeté= 5e-5
+resultat= 5e-05
+@ 'lexer.read_NUM' on '6e7' expect: 60000000.0
+mot_finale= 6e7$
+mot= e7$
+mot accpeté= 6e7
+resultat= 60000000.0
+@ 'lexer.read_NUM' on '7e8' expect: 700000000.0
+mot_finale= 7e8$
+mot= e8$
+mot accpeté= 7e8
+resultat= 700000000.0
+@ 'lexer.read_NUM' on '8E+9' expect: 8000000000.0
+mot_finale= 8E+9$
+mot= E+9$
+mot accpeté= 8E+9
+resultat= 8000000000.0
+@ 'lexer.read_NUM' on '9e-1' expect: 0.9
+mot_finale= 9e-1$
+mot= e-1$
+mot accpeté= 9e-1
+resultat= 0.9
+@ 'lexer.read_NUM' on '4.e+43' expect: 4e+43
+mot_finale= 4.e+43$
+mot= e+43$
+mot accpeté= 4.e+43
+resultat= 4e+43
+@ 'lexer.read_NUM' on '5.4E-67' expect: 5.4e-67
+mot_finale= 5.4E-67$
+mot= E-67$
+mot accpeté= 5.4E-67
+resultat= 5.4e-67
+@ 'lexer.read_NUM' on '.5e0' expect: 0.5
+mot_finale= .5e0$
+mot= e0$
+mot accpeté= .5e0
+resultat= 0.5
+@ 'lexer.read_NUM' on '.3e5' expect: 30000.0
+mot_finale= .3e5$
+mot= e5$
+mot accpeté= .3e5
+resultat= 30000.0
+@ 'lexer.read_NUM' on '0123.e-0' expect: 123.0
+mot_finale= 0123.e-0$
+mot= e-0$
+mot accpeté= 0123.e-0
+resultat= 123.0
+@ 'lexer.read_NUM' on '.123E+0' expect: 0.123
+mot_finale= .123E+0$
+mot= E+0$
+mot accpeté= .123E+0
+resultat= 0.123
+@ 'lexer.read_NUM' on '678.876E-0' expect: 678.876
+mot_finale= 678.876E-0$
+mot= E-0$
+mot accpeté= 678.876E-0
+resultat= 678.876
+@ 'lexer.read_NUM' on '0.e+124' expect: 0.0
+mot_finale= 0.e+124$
+mot= e+124$
+mot accpeté= 0.e+124
+resultat= 0.0
+@ 'lexer.read_NUM' on '000.000E+12' expect: 0.0
+mot_finale= 000.000E+12$
+mot= E+12$
+mot accpeté= 000.000E+12
+resultat= 0.0
+@ 'lexer.read_NUM' on '.0e-98500' expect: 0.0
+mot_finale= .0e-98500$
+mot= e-98500$
+mot accpeté= .0e-98500
+resultat= 0.0
+
+@----  lexer.read_NUM
+@ 'lexer.read_NUM' on '1ee5' expect: 1
+mot_finale= 1ee5$
+mot= ee5$
+mot= ee5
+mot accpeté= 1
+resultat= 1.0
+@ 'lexer.read_NUM' on '1e-' expect: 1
+mot_finale= 1e-$
+mot= e-$
+mot= e-
+mot accpeté= 1
+resultat= 1.0
+@ 'lexer.read_NUM' on '2.E+' expect: 2.0
+mot_finale= 2.E+$
+mot= E+$
+mot= E+
+mot accpeté= 2.
+resultat= 2.0
+@ 'lexer.read_NUM' on '1e' expect: 1
+mot_finale= 1e$
+mot= e$
+mot accpeté= 1
+resultat= 1.0
+@ 'lexer.read_NUM' on '1e+-5' expect: 1
+mot_finale= 1e+-5$
+mot= e+-5$
+mot= e+-5
+mot= e+-
+mot= e+
+mot accpeté= 1
+resultat= 1.0
+@ 'lexer.read_NUM' on '1e+' expect: 1
+mot_finale= 1e+$
+mot= e+$
+mot= e+
+mot accpeté= 1
+resultat= 1.0
+@ 'lexer.read_NUM' on 'e' expect: None
+mot_finale= e$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on '+' expect: None
+mot_finale= +$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on '-' expect: None
+mot_finale= -$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on 'e5' expect: None
+mot_finale= e5$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on 'e+5' expect: None
+mot_finale= e+5$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on '+1e5' expect: None
+mot_finale= +1e5$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on '-1e5' expect: None
+mot_finale= -1e5$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on '.e5' expect: None
+mot_finale= .e5$
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on '' expect: None
+mot_finale= $
+Aucun préfixe accepté
+@ 'lexer.read_NUM' on 'a2' expect: None
+@ 'lexer.read_NUM' on '0a0' expect: None
+@ 'lexer.read_NUM' on '1a0' expect: None
+@ 'lexer.read_NUM' on '1.a2' expect: None
+@ 'lexer.read_NUM' on '0.a0' expect: None
+@ 'lexer.read_NUM' on '1a.' expect: None
+@ 'lexer.read_NUM' on '2e+a0' expect: None
+@ 'lexer.read_NUM' on '1e1a0' expect: None
+
+@----  lexer.next_token
+@ 'lexer.next_token' on '1 2.0 3e-1 .4' expect: [(<Token.NUM: 0>, 1), (<Token.NUM: 0>, 2.0), (<Token.NUM: 0>, 0.3), (<Token.NUM: 0>, 0.4), (<Token.END: 11>, None)]
+Traceback (most recent call last):
+  File "/home/alexis/analyse_tl1/test_lexer.py", line 270, in <module>
+    exec_test_next_token()
+  File "/home/alexis/analyse_tl1/test_lexer.py", line 237, in exec_test_next_token
+    test_all_token_sequence_ok("lexer.next_token", [
+  File "/home/alexis/analyse_tl1/test_lexer.py", line 151, in test_all_token_sequence_ok
+    test_token_sequence_ok(function_to_test, i, r)
+  File "/home/alexis/analyse_tl1/test_lexer.py", line 146, in test_token_sequence_ok
+    raise exn from None
+  File "/home/alexis/analyse_tl1/test_lexer.py", line 134, in test_token_sequence_ok
+    found_result = eval(function_to_test+"()")
+  File "<string>", line 1, in <module>
+  File "/home/alexis/analyse_tl1/lexer.py", line 452, in next_token
+    return read_token_after_separators()
+  File "/home/alexis/analyse_tl1/lexer.py", line 377, in read_token_after_separators
+    return (defs.TOKEN_MAP[''],calcul(mot_final))
+  File "/home/alexis/analyse_tl1/lexer.py", line 314, in calcul
+    mot1=float(mot1)
+ValueError: could not convert string to float: '1 2.0 3'

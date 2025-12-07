@@ -104,7 +104,8 @@ def reinit(stream=sys.stdin):
 def read_INT_to_EOI():
     #print("@ATTENTION: lexer.read_INT_to_EOI à finir !") # LIGNE A SUPPRIMER
     x=peek_char1()
-    print("ici x=",x)
+    if x==defs.EOI:
+        return False
     number=['0','1','2','3','4','5','6','7','8','9']
     while x!= defs.EOI :
         if x in number:
@@ -123,6 +124,8 @@ def read_FLOAT_to_EOI():
     if c== '.':
         consume_char()
         c=peek_char1()
+        if c==defs.EOI:
+            return False
         while c!=defs.EOI:
             if c in number:
                 consume_char()
@@ -178,6 +181,8 @@ def read_INT():
         nombre+=c
         consume_char()
         c=peek_char1()
+    if nombre=="":
+        return None
     return int(nombre)
     
     
@@ -205,11 +210,11 @@ def B(dernier_car,mot):
     interger=['0','1','2','3','4','5','6','7','8','9']
     pointfloat=['.','0','1','2','3','4','5','6','7','8','9']
     exposant=['e','E','+','-']
+    print("mot=",mot)
     mot = mot[1:]               #Q4
     c=mot[0]
-    print("mot=",mot)
     if c in interger:               #Q6
-        while c!=dernier_car:
+        while c!=defs.EOI:
             if c in interger:
                 mot = mot[1:] 
                 c=mot[0]
@@ -235,7 +240,7 @@ def B(dernier_car,mot):
     else:
         return False
 #Sous partie de la fonction read_NUMBER_to_EOI
-def A(dernier_car,mot):
+def A(dernier_car,mot,x):
     interger=['0','1','2','3','4','5','6','7','8','9']
     pointfloat=['.','0','1','2','3','4','5','6','7','8','9']
     exposant=['e','E','+','-']
@@ -243,6 +248,8 @@ def A(dernier_car,mot):
         return False
     mot = mot[1:]  
     c=mot[0]
+    if x==0 and (c=="e" or c=="E"):
+        return False
     if c=='.':
         return False
     while c!=dernier_car and c!='E' and c!='e': #Q2
@@ -268,7 +275,7 @@ def read_NUMBER_to_EOI(mot):
         return False
     dernier_car=mot[-1]
     if c== '.':                     #Q1
-        return A(dernier_car,mot)
+        return A(dernier_car,mot,0) #le 0 est pour savoir si avant le '.' il y avait un nombre 1=Oui , 0=Non
     else:
         if c==dernier_car: #Cas ou ou l'entré est de longueur 1
             return True
@@ -286,7 +293,7 @@ def read_NUMBER_to_EOI(mot):
             else:
                 return False
         elif c=='.':
-            return A(dernier_car,mot)
+            return A(dernier_car,mot,1) #le 1 est pour savoir si avant le '.' il y avait un nombre 1=Oui , 0=Non
         else:
             return B(dernier_car,mot)
 
@@ -304,17 +311,17 @@ def calcul(mot):
             if x=='E' or x=='e':
                 deja_passe=True
         if '.' in mot1:
-            mot1=float(mot1)
+            mot1=round(float(mot1),5)
         else:
             mot1=int(mot1)
         if '.' in mot2:
-            mot2=float(mot2)
+            mot2=round(float(mot2),5)
         else:
             mot2=int(mot2)
         return mot1*(10**(mot2))
     else:
         if '.' in mot:
-            return float(mot)
+            return round(float(mot),5)
         else:
             return int(mot)
 
@@ -341,53 +348,191 @@ def read_NUM():
         mot_finale=mot_finale[:-1]
     if mot_finale=="":
         print("Aucun préfixe accepté")
-        return
+        return None
+    if mot_finale[-1]==defs.EOI:
+        mot_finale=mot_finale[:-1]
     print("mot accpeté=",mot_finale)
-    print("resultat=", calcul(mot_finale))
-    return   
+    print("resultat=", float(calcul(mot_finale)))
+    return   float(calcul(mot_finale))
 
 
 # Parse un lexème (sans séparateurs) de l'entrée et renvoie son token.
 # Cela consomme tous les caractères du lexème lu.
 def read_token_after_separators():
-    #print("@ATTENTION: lexer.read_token_after_separators à finir !") # LIGNE A SUPPRIMER
-    integer=["0","1","2","3","4","5","6","7","8","9"]
-    mot_final=""
-    c=peek_char1()
-    if c=="#":
-        res=read_INT()
-        return (defs.TOKEN_MAP["CALC"],res)
-    elif c=="." or c in integer:
-        while c!=defs.EOI:
-            mot_final+=c
-            consume_char() 
-            c=peek_char1()
-        while mot_final!="" and not read_NUMBER_to_EOI(mot_final):
-            mot_final=mot_final[:-1]
-        return (defs.TOKEN_MAP["NUM"],calcul(mot_final))
-    else:
-        lex=""
-        if c=="+":
-            lex="ADD"
-        elif c=="-":
-            lex="SUB"
-        elif c=="*":
-            lex="MUL"
-        elif c=="/":
-            lex="DIV"
-        elif c=="^":
-            lex="POW"
-        elif c=="!":
-            lex="FACT"
-        elif c=="(":
-            lex="OPAR"
-        elif c==")":
-            lex="CPAR"
-        elif c==";":
-            lex="SEQ"
+    # #print("@ATTENTION: lexer.read_token_after_separators à finir !") # LIGNE A SUPPRIMER
+    pointfloat=["0","1","2","3","4","5","6","7","8","9","."]
+    interger=["0","1","2","3","4","5","6","7","8","9"]
+    #*************************************Version 1*************************************************************
+    # mot_final=""
+    # c=peek_char1()
+    # if c=="#":
+    #     consume_char()
+    #     res=read_INT()
+    #     return (defs.TOKEN_MAP["#"],res)
+    # elif c=="." or c in integer:
+    #     while c!=defs.EOI:
+    #         mot_final+=c
+    #         consume_char() 
+    #         c=peek_char1()
+    #     while mot_final!="" and not read_NUMBER_to_EOI(mot_final):
+    #         mot_final=mot_final[:-1]
+
+    #     print("mot_finale=",mot_final)
+    #     return (defs.TOKEN_MAP[''],calcul(mot_final))
+    # else:
+    #     return (defs.TOKEN_MAP[c],None) 
+    #**********************Version2***************************************************************
+    # mot=""
+    # c=peek_char1()
+    # while c!=defs.EOI:
+    #     mot+=c
+    #     consume_char()
+    #     c=peek_char1()
+    # print("mot=",mot)
+    # tab=[]
+    # mot2=""
+    # for x in mot:
+    #     if x in defs.SEP or x==defs.EOI:
+    #         tab.append(mot2)
+    #         mot2=""
+    #     elif x in ["+","-","!",")","(",";","/","*","$","^"]:
+    #         if mot2[-1]!="e" and mot2[-1]!="E":
+    #             tab.append(mot2)
+    #             tab.append(x)
+    #             mot2=""
+    #         else:
+    #             mot2+=x
+    #     else:
+    #         mot2+=x
+    # tab.append(mot2) #tab contient tous les mots si il y a des espaces
+
+    # res=[] # tableau où il y aura les couples pour chaque mot 
+    # for c in tab:
+    #     if c[0]=="#":
+    #         res.append((defs.TOKEN_MAP['#'],calcul(c[1:])))
+    #     elif c[0] in pointfloat:
+    #         print("c=",c)
+    #         res.append((defs.TOKEN_MAP[''],round(calcul(c),5)))
+    #     else:
+    #         res.append((defs.TOKEN_MAP[c],None))
+    # res.append((defs.TOKEN_MAP[defs.EOI],None))
+    # return res
+    #***********************Version 3************************************************
+    #Ma logie est basé sur le faite que entre les separateurs il y a pas de sequences de caractères supérieur à 3
+    mot=peek_char1()
+    car=''
+    tab=peek_char3()
+    a=tab[0]
+    b=tab[1]
+    c=tab[2]
+    if a in ["+","-","!",")","(",";","/","*","$","^"]:
+        consume_char()
+        return (defs.TOKEN_MAP[mot],None)
+    elif a=="#":
+        consume_char()
+        if b in interger:
+            mot+=b 
+            consume_char()
+        if c in interger:
+            mot+=c 
+            consume_char()
+        a=peek_char1()
+        while a in interger:
+            mot+=a 
+            consume_char()
+            a=peek_char1()
+        return (defs.TOKEN_MAP['#'],round(calcul(mot[1:]),5))
+    elif a in pointfloat:
+        consume_char()
+        a=peek_char1()
+        while a in interger:
+            mot+=a 
+            consume_char()
+            a=peek_char1()
+        #En s'arretant ici la suite est soit soit E soit - soit defs.SEP soit ["+","-","!",")","(",";","/","*","$","^"]
+        tab=peek_char3()
+        a=tab[0]
+        b=tab[1]
+        c=tab[2]
+        if a in ["+","-","!",")","(",";","/","*","$","^"]:
+            return(defs.TOKEN_MAP[''],round(calcul(mot),5))
+        #Si on a E ou e , soit on a + (ou -) suivi de interger soit on a juste des interger
+        elif a=="E" or a=="e":
+            consume_char()
+            tab=peek_char3()
+            d=tab[0]
+            e=tab[1]
+            f=tab[2]
+            if d=="+" or d=="-":
+                if e in interger:
+                    mot+=a 
+                    mot+=d 
+                    consume_char() #Pour consommer le d
+                    while e in interger:
+                        mot+=e 
+                        consume_char()
+                        e=peek_char1()
+                return(defs.TOKEN_MAP[''],round(calcul(mot),5))
+            elif d in interger:
+                while d in interger:
+                    mot+=d
+                    consume_char()
+                    d=peek_char1()
+                return(defs.TOKEN_MAP[''],round(calcul(mot),5))
+            else:
+                #Ici c'est le cas où l'on a ni + ni - ni interger
+                return(defs.TOKEN_MAP[''],round(calcul(mot),5))
+        elif a==".":
+            mot+=a
+            consume_char()
+            if b=="E" or b=="e":
+                tab=peek_char3()
+                d=tab[0]
+                e=tab[1]
+                f=tab[2]
+                if d=="+" or d=="-":
+                    if e in interger:
+                        mot+=b
+                        mot+=d 
+                        while e in interger:
+                            mot+=e 
+                            consume_char()
+                            e=peek_char1()
+                    return(defs.TOKEN_MAP[''],round(calcul(mot),5))
+            if b in interger:
+                while b in interger:
+                    mot+=b
+                    consume_char() 
+                    b=peek_char1()
+                if b=="E" or b=="e":
+                    consume_char()
+                    tab=peek_char3()
+                    d=tab[0]
+                    e=tab[1]
+                    f=tab[2]
+                    if d=="+" or d=="-":
+                        if e in interger:
+                            mot+=b
+                            mot+=d 
+                            while e in interger:
+                                mot+=e 
+                                consume_char()
+                                e=peek_char1()
+                        return(defs.TOKEN_MAP[''],round(calcul(mot),5))
+            return(defs.TOKEN_MAP[''],round(calcul(mot),5))
         else:
-            lex="END"
-        return (defs.TOKEN_MAP[lex],None)
+            return(defs.TOKEN_MAP[''],round(calcul(mot),5))
+    else:
+        #cas où l'on est à la fin de l'entrée
+        return(defs.TOKEN_MAP[defs.EOI],None)
+
+    
+
+     
+
+
+
+
 
 
 # Donne le prochain token de l'entrée, en sautant les séparateurs éventuels en tête
@@ -439,7 +584,6 @@ def next_token():
                 a=mot[0]
             else:
                 return read_token_after_separators()
-
     return read_token_after_separators()
 
 
@@ -466,6 +610,7 @@ def test_lexer():
     print("@ Testing the lexer. Just type tokens and separators on one line")
     reinit()
     token, value = next_token()
+    print("********token=",token,"value=",value,"******************")
     while token != defs.V_T.END:
         print("@", defs.str_attr_token(token, value))
         token, value = next_token()
