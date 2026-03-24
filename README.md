@@ -46,9 +46,9 @@ python3 tests/test_calc.py   => Validation des résultats mathématiques
 
 # Explication des fichiers complémentaires
 
-test.txt :
+**test.txt** :
 Ce fichier regroupe des tests supplémentaires pour le lexer, en plus de ceux fournis par le professeur.
 
-test_rattrapage :
+**test_rattrapage** :
 Ce fichier rassemble tous les tests effectués sur rattrapage.py. 
 On y trouve aussi bien les tests réussis que ceux qui ont échoué.
