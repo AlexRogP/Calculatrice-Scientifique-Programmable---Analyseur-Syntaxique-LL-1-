@@ -1,12 +1,3 @@
-Explication des fichiers complémentaires
-
-test.txt :
-Ce fichier regroupe des tests supplémentaires pour le lexer, en plus de ceux fournis par le professeur.
-
-test_rattrapage :
-Ce fichier rassemble tous les tests effectués sur rattrapage.py. 
-On y trouve aussi bien les tests réussis que ceux qui ont échoué.
-
 Calculatrice Scientifique : Analyseur Syntaxique LL(1)
 Ce projet, réalisé durant le premier semestre à l'ENSIMAG, consiste en la conception et 
 l'implémentation d'une chaîne de compilation complète pour une calculatrice capable de 
@@ -51,3 +42,12 @@ Le projet inclut une suite de tests unitaires pour valider chaque étape :
 python3 tests/test_lexer.py  => Validation de l'automate
 python3 tests/test_parser.py => Validation de la syntaxe
 python3 tests/test_calc.py   => Validation des résultats mathématiques
+
+Explication des fichiers complémentaires
+
+test.txt :
+Ce fichier regroupe des tests supplémentaires pour le lexer, en plus de ceux fournis par le professeur.
+
+test_rattrapage :
+Ce fichier rassemble tous les tests effectués sur rattrapage.py. 
+On y trouve aussi bien les tests réussis que ceux qui ont échoué.
