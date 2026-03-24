@@ -1,9 +1,10 @@
-Calculatrice Scientifique : Analyseur Syntaxique LL(1)
+#Calculatrice Scientifique : Analyseur Syntaxique LL(1)
 Ce projet, réalisé durant le premier semestre à l'ENSIMAG, consiste en la conception et 
 l'implémentation d'une chaîne de compilation complète pour une calculatrice capable de 
 traiter des expressions arithmétiques complexes.
 
-FonctionnalitésCalculs avancés : Support des nombres entiers, flottants et de la notation scientifique.
+#Fonctionnalités 
+Calculs avancés : Support des nombres entiers, flottants et de la notation scientifique.
 
 Opérateurs : Addition, soustraction, multiplication, division, puissances et factorielles.
 
@@ -12,7 +13,7 @@ Mémoire de calcul : Possibilité de réutiliser les résultats des calculs pré
 Gestion d'erreurs : Implémentation d'un mécanisme de rattrapage (error recovery) pour poursuivre l'analyse 
 malgré des erreurs de syntaxe.
 
-🛠 Architecture Technique
+🛠 #Architecture Technique
 Le projet est divisé en deux phases majeures qui forment un analyseur syntaxique
 
 1. Analyse Lexicale (Lexer)L'analyseur lexical transforme le flux de caractères en une suite de tokens:
@@ -22,22 +23,22 @@ Le projet est divisé en deux phases majeures qui forment un analyseur syntaxiqu
 
 2. Analyse Grammaticale (Parser)L'analyseur grammatical vérifie la structure de la suite de tokens selon une grammaire 
 hors-contexte.
-Grammaire LL(1) : Transformation d'une grammaire ambiguë pour lever les priorités et les associativités des opérateurs.
-Calcul d'attributs : L'évaluation mathématique est effectuée de manière récursive pendant l'analyse grammaticale.
+**Grammaire LL(1)** : Transformation d'une grammaire ambiguë pour lever les priorités et les associativités des opérateurs.
+**Calcul d'attributs** : L'évaluation mathématique est effectuée de manière récursive pendant l'analyse grammaticale.
 
-📁 Structure du Projet
+📁 #Structure du Projet
 
-lexer.py : Logique des automates et segmentation du flux d'entrée.
+**lexer.py** : Logique des automates et segmentation du flux d'entrée.
 
-parser.py : Analyseur syntaxique descendant et gestion de la grammaire.
+**parser.py** : Analyseur syntaxique descendant et gestion de la grammaire.
 
-calc.py : Extension du parser intégrant le calcul effectif des valeurs.
+**calc.py** : Extension du parser intégrant le calcul effectif des valeurs.
 
-definitions.py : Définition des tokens et des vocabulaires terminaux.
+**definitions.py** : Définition des tokens et des vocabulaires terminaux.
 
-rattrapage.py : Module dédié à la résilience face aux erreurs de saisie.
+**rattrapage.py** : Module dédié à la résilience face aux erreurs de saisie.
 
-🧪 Tests
+🧪 #Tests
 Le projet inclut une suite de tests unitaires pour valider chaque étape :
 python3 tests/test_lexer.py  => Validation de l'automate
 python3 tests/test_parser.py => Validation de la syntaxe
